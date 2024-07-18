@@ -1,13 +1,7 @@
 from flask_restful import Resource,reqparse
 from models.CarroModel import CarroModel
 
-lista_carros = [ {
-            'id_carro':1,
-            'nome':'celta',
-            'ano':2006},
-            {'id_carro':2,
-            'nome':'prisma',
-            'ano':2017}]
+lista_carros = [ ]
 
 class Carros(Resource):
     def get(self):
@@ -20,6 +14,8 @@ class Carro(Resource):
                 return carro
 
     def post(self,id_carro):
+        if CarroModel.find(id_carro):
+            return {"message": "car exists"}
         argumento = reqparse.RequestParser()
         
         argumento.add_argument('nome')
@@ -28,10 +24,8 @@ class Carro(Resource):
         valor = argumento.parse_args()
         
         objeto_carro = CarroModel(id_carro, **valor)
-        novo_carro = objeto_carro.json()
-        
-        lista_carros.append(novo_carro)
-        return novo_carro,200
+        objeto_carro.save()
+        return objeto_carro.json()
     
     def put(self,id_carro):
         argumento = reqparse.RequestParser()

@@ -17,5 +17,14 @@ class CarroModel(db.Model):
             'ano': self.ano
         }
         
+    @classmethod
+    def find(cls,id_carro):
+        carro = cls.query.filter_by(id_carro = id_carro).first()
+        if carro:
+            return carro
+        else:
+            return None
         
-        
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
