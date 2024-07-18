@@ -1,4 +1,5 @@
 from flask_restful import Resource,reqparse
+from models.CarroModel import CarroModel
 lista_carros = [ {
             'id_carro':1,
             'nome':'celta',
@@ -25,12 +26,8 @@ class Carro(Resource):
         
         valor = argumento.parse_args()
         
-        novo_carro ={
-            'id_carro':id_carro,
-            'nome':valor['nome'],
-            'ano':valor['ano']
-        }
-        
+        objeto_carro = CarroModel(id_carro, **valor)
+        novo_carro = objeto_carro.json()
         
         lista_carros.append(novo_carro)
         return novo_carro,200
@@ -43,7 +40,10 @@ class Carro(Resource):
         
         for carro in lista_carros:
             if carro['id_carro'] == id_carro:
-                novo_carro = {'id_carro':id_carro,**valor}
+                
+                objeto_carro = CarroModel(id_carro, **valor)
+                novo_carro = objeto_carro.json()
+                
                 carro.update(novo_carro)
                 return novo_carro,200
   
@@ -52,9 +52,11 @@ class Carro(Resource):
         argumento.add_argument('ano')
         
         valor = argumento.parse_args()
-        carro_novo = {'id_carro':id_carro,**valor}
-        lista_carros.append(carro_novo)
-        return carro_novo,201 #criado
+        objeto_carro = CarroModel(id_carro, **valor)
+        novo_carro = objeto_carro.json()
+        lista_carros.append(novo_carro)
+        
+        return novo_carro,201 #criado
     
     def delete(self,id_carro):
         global lista_carros
