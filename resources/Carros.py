@@ -1,17 +1,19 @@
 from flask_restful import Resource,reqparse
 from models.CarroModel import CarroModel
 
-lista_carros = [ ]
+
 
 class Carros(Resource):
     def get(self):
-        return lista_carros
+        return {"carros":[carro.json() for carro in CarroModel.query.all()]}
 
 class Carro(Resource):
     def get(self,id_carro):
-        for carro in lista_carros:
-            if carro['id_carro'] == id_carro:
-                return carro
+        carro = CarroModel.find(id_carro)
+        if carro:
+            return carro.json()
+        
+        return {"message":"car is not found"}
 
     def post(self,id_carro):
         if CarroModel.find(id_carro):
@@ -33,27 +35,21 @@ class Carro(Resource):
         argumento.add_argument('ano')
         valor = argumento.parse_args()
         
-        for carro in lista_carros:
-            if carro['id_carro'] == id_carro:
-                
-                objeto_carro = CarroModel(id_carro, **valor)
-                novo_carro = objeto_carro.json()
-                
-                carro.update(novo_carro)
-                return novo_carro,200
-  
-        argumento = reqparse.RequestParser()
-        argumento.add_argument('nome')
-        argumento.add_argument('ano')
+        carro = CarroModel.find(id_carro)
+        if carro:
+            carro.update(**valor)
+            carro.save()
+            return carro.json(),200
         
-        valor = argumento.parse_args()
-        objeto_carro = CarroModel(id_carro, **valor)
-        novo_carro = objeto_carro.json()
-        lista_carros.append(novo_carro)
+        carro = CarroModel(id_carro,**valor)
         
-        return novo_carro,201 #criado
+        carro.save()
+        
+        return carro.json(),201
     
     def delete(self,id_carro):
-        global lista_carros
-        lista_carros = [carro for carro in lista_carros if carro['id_carro'] != id_carro]
-        return {"message":"carro deleted"}
+        carro = CarroModel.find(id_carro)
+        
+        if carro:
+            carro.delete()
+            return {"message":"carro delete"}
